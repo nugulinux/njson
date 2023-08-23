@@ -1,0 +1,8 @@
+SET(target_test test_njson)
+
+ADD_EXECUTABLE(${target_test} test_njson.cpp)
+TARGET_LINK_LIBRARIES(${target_test} GTest::gtest_main njson)
+ADD_DEPENDENCIES(${target_test} njson)
+
+INCLUDE(GoogleTest)
+gtest_discover_tests(${target_test})
