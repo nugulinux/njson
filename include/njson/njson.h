@@ -17,12 +17,15 @@
 #ifndef __NJSON_H__
 #define __NJSON_H__
 
+#include <fstream>
+#include <iostream>
 #include <memory>
 #include <string>
 
 namespace NJson {
 
 using ArrayIndex = unsigned int;
+using LargestInt = long long;
 
 enum ValueType {
     nullValue = 0,
@@ -58,7 +61,10 @@ public:
     Value(const Value& other);
     Value(ValueType type);
     Value(const std::string& str);
+    Value(const char* str);
+    Value(bool value);
 
+    bool operator==(const Value& other) const;
     Value operator[](const std::string& name);
     const Value operator[](const std::string& name) const;
     Value operator[](ArrayIndex index);
@@ -101,6 +107,8 @@ private:
     friend class StyledWriter;
     friend class FastWriter;
     friend class Reader;
+    friend std::istream& operator>>(std::istream& input_stream, Value& value);
+
     struct ValueArgs;
     struct ValueImpl;
 
@@ -123,6 +131,9 @@ class FastWriter {
 public:
     std::string write(const Value& value);
 };
+
+std::istream& operator>>(std::istream& input_stream, Value& value);
+
 };
 
 #endif // __NJSON_H__

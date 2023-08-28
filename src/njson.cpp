@@ -15,6 +15,7 @@
  */
 
 #include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
@@ -197,6 +198,23 @@ Value::Value(const std::string& str)
     *this = str.c_str();
 }
 
+Value::Value(const char* str)
+    : Value()
+{
+    *this = str;
+}
+
+Value::Value(bool value)
+    : Value()
+{
+    *this = value;
+}
+
+bool Value::operator==(const Value& other) const
+{
+    return *(pimpl->native_value) == *(other.pimpl->native_value);
+}
+
 Value Value::operator[](const std::string& name)
 {
     return pimpl->getMemberByName(name);
@@ -209,6 +227,12 @@ const Value Value::operator[](const std::string& name) const
 
 Value Value::operator[](ArrayIndex index)
 {
+    if (!isArray())
+        pimpl->native_value->SetArray();
+
+    while (index >= size())
+        append(Value());
+
     return pimpl->getValue(index);
 }
 
@@ -463,5 +487,21 @@ std::string StyledWriter::write(const Value& value)
 std::string FastWriter::write(const Value& value)
 {
     return stringify<rapidjson::Writer<rapidjson::StringBuffer>>(value.pimpl->native_value);
+}
+
+/*******************************************************************************
+ * define extras
+ ******************************************************************************/
+std::istream& operator>>(std::istream& input_stream, Value& value)
+{
+    rapidjson::IStreamWrapper input_stream_wrapper(input_stream);
+    rapidjson::Document document;
+
+    document.ParseStream(input_stream_wrapper);
+
+    if (!document.HasParseError())
+        value = Value::ValueArgs { &document };
+
+    return input_stream;
 }
 } // NJson

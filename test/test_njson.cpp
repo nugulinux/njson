@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <fstream>
 #include <gtest/gtest.h>
 
 #include "njson/njson.h"
@@ -36,7 +37,6 @@
 TEST(njsonTest, MakeSimpleObject)
 {
     NJson::Value jvalue;
-    long long largest_int = 80000;
     unsigned int u_int = 400;
     float float_number = 3.14;
 
@@ -44,7 +44,6 @@ TEST(njsonTest, MakeSimpleObject)
     jvalue["number"] = 10;
     jvalue["boolean"] = false;
     jvalue["double"] = 0.1;
-    jvalue["largest_int"] = largest_int;
     jvalue["u_int"] = u_int;
     jvalue["float"] = float_number;
 
@@ -52,7 +51,6 @@ TEST(njsonTest, MakeSimpleObject)
     ASSERT_EQ(jvalue["number"].asInt(), 10);
     ASSERT_EQ(jvalue["boolean"].asBool(), false);
     ASSERT_EQ(jvalue["double"].asDouble(), 0.1);
-    ASSERT_EQ(jvalue["largest_int"].asLargestInt(), largest_int);
     ASSERT_EQ(jvalue["u_int"].asUInt(), u_int);
     ASSERT_EQ(jvalue["float"].asFloat(), float_number);
 
@@ -87,6 +85,28 @@ TEST(njsonTest, MakeSimpleArray)
 
         ASSERT_EQ(jitem["index"].asInt(), (int)i);
     }
+}
+
+TEST(njsonTest, MakeArrayByIndex)
+{
+    NJson::Value value;
+    NJson::FastWriter writer;
+
+    value["items"][0] = "item_1";
+    value["items"][1] = "item_2";
+    value["items"][2] = "item_3";
+    value["orders"][0] = "first";
+    value["orders"][1] = "second";
+    value["internals"][0]["type"] = "basic";
+
+    ASSERT_EQ(value["items"].size(), 3);
+    ASSERT_EQ(value["orders"].size(), 2);
+    ASSERT_EQ(value["items"][0].asString(), "item_1");
+    ASSERT_EQ(value["orders"][1].asString(), "second");
+    ASSERT_EQ(value["internals"][0]["type"].asString(), "basic");
+
+    NJson::Value sub_value = value["internals"][0];
+    ASSERT_EQ(sub_value["type"], "basic");
 }
 
 TEST(njsonTest, MakeMultipleObject)
@@ -167,6 +187,19 @@ TEST(njsonTest, ParsingNoExistNode)
     ASSERT_TRUE(!root["none"].asBool());
 }
 
+TEST(njsonTest, ParsingFromStream)
+{
+    std::ifstream config("test.json", std::ifstream::binary);
+    NJson::FastWriter writer;
+    NJson::Value root;
+    config >> root;
+
+    ASSERT_TRUE(!root.empty());
+    ASSERT_EQ(root["server"].asString(), "test_server");
+    ASSERT_EQ(root["code"].asString(), "1234");
+    ASSERT_EQ(root["info"]["number"].asString(), "abcd");
+}
+
 TEST(njsonTest, CheckKeyAndGetValue)
 {
     NJson::Value root;
@@ -241,9 +274,25 @@ TEST(njsonTest, MakeAndParseValue)
 
     jvalue["string"] = "text";
     jvalue["number"] = 10;
+    jvalue["bool"] = true;
 
     ASSERT_EQ(jvalue["string"].asString(), "text");
     ASSERT_EQ(jvalue["number"].asInt(), 10);
+    ASSERT_EQ(jvalue["bool"].asBool(), true);
+    ASSERT_TRUE(jvalue["bool"] == true);
+}
+
+TEST(njsonTest, HandleLargestInt)
+{
+    NJson::Value jvalue;
+    long long_int = 2147483640;
+    long long largest_int = 21474836470;
+
+    jvalue["largest_int"] = largest_int;
+    jvalue["casting_largest_int"] = (NJson::LargestInt)long_int;
+
+    ASSERT_EQ(jvalue["largest_int"].asLargestInt(), largest_int);
+    ASSERT_EQ(jvalue["casting_largest_int"].asLargestInt(), long_int);
 }
 
 TEST(njsonTest, AssignNullValue)
