@@ -90,7 +90,6 @@ TEST(njsonTest, MakeSimpleArray)
 TEST(njsonTest, MakeArrayByIndex)
 {
     NJson::Value value;
-    NJson::FastWriter writer;
 
     value["items"][0] = "item_1";
     value["items"][1] = "item_2";
@@ -190,7 +189,6 @@ TEST(njsonTest, ParsingNoExistNode)
 TEST(njsonTest, ParsingFromStream)
 {
     std::ifstream config("test.json", std::ifstream::binary);
-    NJson::FastWriter writer;
     NJson::Value root;
     config >> root;
 
