@@ -89,6 +89,7 @@ public:
     bool isString() const;
     bool isInt() const;
     bool isNumeric() const;
+    bool isBool() const;
     const char* asCString() const;
     std::string asString() const;
     int asInt() const;
