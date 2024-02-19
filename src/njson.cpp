@@ -375,6 +375,11 @@ bool Value::isNumeric() const
     return pimpl->native_value->IsNumber();
 }
 
+bool Value::isBool() const
+{
+    return pimpl->native_value->IsBool();
+}
+
 const char* Value::asCString() const
 {
     if (pimpl->native_value->IsString())

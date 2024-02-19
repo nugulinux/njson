@@ -60,9 +60,11 @@ TEST(njsonTest, MakeSimpleObject)
 
     // check number
     ASSERT_TRUE(!jvalue["string"].isNumeric());
-    ASSERT_TRUE(!jvalue["boolean"].isNumeric());
     ASSERT_TRUE(jvalue["number"].isNumeric());
     ASSERT_TRUE(jvalue["double"].isNumeric());
+
+    // check bool
+    ASSERT_TRUE(jvalue["boolean"].isBool());
 }
 
 TEST(njsonTest, MakeSimpleArray)
